@@ -18,9 +18,10 @@ int main(int argc, char* argv[]){
     string INfile=argv[2];
     string Cfile=argv[4];
     string OUTfile=argv[6];
+    int numof_clusters, numof_grids, numofV_hashtables, numofV_hashfuncts;
 
     //anoigoume to cluster.conf kai pairnoume tis times twn metavlhtwn
-
+    configuration(Cfile, &numof_clusters, &numof_grids, &numofV_hashtables, &numofV_hashfuncts);
     //anoigoume to input kai vlepoume an einai vectors h curves
     fstream file;
     string line;
@@ -46,7 +47,7 @@ int main(int argc, char* argv[]){
         int flag = 0;
 
         while(1){
-            vector<Cluster> temp_clusters = Lloids_Assignment(num_of_centr, d, centroids, Items);
+            vector<Cluster> temp_clusters = Lloyds_Assignment(num_of_centr, d, centroids, Items);
             //update
             vector<Vector_Item> new_centroids;
 

@@ -21,7 +21,7 @@ void Random_Vector_Cetroids_Selection(vector<Vector_Item>* centroids, vector<Vec
     }
 }
 
-vector<Cluster> Lloids_Assignment(int num_of_centr, int d, vector<Vector_Item> centroids, vector<Vector_Item> Items){
+vector<Cluster> Lloyds_Assignment(int num_of_centr, int d, vector<Vector_Item> centroids, vector<Vector_Item> Items){
     vector<Cluster> clusters;
     for(int i=0; i<num_of_centr; i++){
         Cluster cl;
@@ -44,6 +44,10 @@ vector<Cluster> Lloids_Assignment(int num_of_centr, int d, vector<Vector_Item> c
         clusters.at(nearest_centre_pos).push_position(i);
         //cout<< endl << Items.at(i).get_item_id() << " to center " << centroids.at(nearest_centre_pos).get_item_id() << endl;
     }
-    
+
     return clusters;
+}
+
+void K_means_pp(){
+    
 }

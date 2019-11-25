@@ -70,6 +70,46 @@ int Initialize_Dataset_Vector(string filename, vector<Vector_Item>* Items){
     return c;
 }
 
+void configuration(string conf_file, int* numof_clusters, int* numof_grids, int* numofV_hashtables, int* numofV_hashfuncts){
+    ifstream Configfile;
+    Configfile.open(conf_file, ios::in);
+
+    string line;
+    int flag=0;
+    int var_counter=1;
+
+    while(Configfile.good()){
+        if (!getline (Configfile, line)) break;
+        string var="";
+
+        for(auto x: line){
+            if(flag==1){
+                var=var+x;
+                if(var_counter==1){
+                    *numof_clusters=stoi(var);
+                }else if(var_counter==2){
+                    *numof_grids=stoi(var);
+                }else if(var_counter==3){
+                    *numofV_hashtables=stoi(var);
+                }else if(var_counter==4){
+                    *numofV_hashfuncts=stoi(var);
+                }
+            }
+            if(x==' ')  flag=1;
+        }
+        var_counter++;
+        var="";
+        flag=0;
+    }
+
+    cout << "Number of clusters=" << *numof_clusters << endl;
+    cout << "Numner of grids=" << *numof_grids << endl;
+    cout << "Number of vector hash tables=" << *numofV_hashtables << endl;
+    cout << "Number of vector hash functions=" << *numofV_hashfuncts << endl;
+
+    return;
+}
+
 Vector_Item ExactNN(vector<Vector_Item> Items, Vector_Item item, int c, int* ExactNN_dist){
     int NN_pos = -1;
     int d = item.get_vector().size();
