@@ -12,8 +12,6 @@
 
 int main(int argc, char* argv[]){
 
-    int num_of_centr = 4;
-
     //diavazoume ta argv pou einai ta onomata twn arxeiwn
     string INfile=argv[2];
     string Cfile=argv[4];
@@ -22,6 +20,12 @@ int main(int argc, char* argv[]){
 
     //anoigoume to cluster.conf kai pairnoume tis times twn metavlhtwn
     configuration(Cfile, &numof_clusters, &numof_grids, &numofV_hashtables, &numofV_hashfuncts);
+    // cout << "Number of clusters=" << numof_clusters << endl;
+    // cout << "Number of grids=" << numof_grids << endl;
+    // cout << "Number of vector hash tables=" << numofV_hashtables << endl;
+    // cout << "Number of vector hash functions=" << numofV_hashfuncts << endl;
+
+
     //anoigoume to input kai vlepoume an einai vectors h curves
     fstream file;
     string line;
@@ -39,15 +43,17 @@ int main(int argc, char* argv[]){
 
         vector<Vector_Item> centroids;  //pinakas gia na krataw ta kentra
 
-        //kaoume tis 8 periptwseis
+        //kanoume tis 8 periptwseis
         //1-1-2
-        Random_Vector_Cetroids_Selection(&centroids, Items, num_of_centr);
+        Random_Vector_Cetroids_Selection(&centroids, Items, numof_clusters);
+        for(int i=0; i<numof_clusters; i++)
+            cout << centroids.at(i).get_item_id() << endl;
 
         vector<Cluster> clusters;
         int flag = 0;
 
         while(1){
-            vector<Cluster> temp_clusters = Lloyds_Assignment(num_of_centr, d, centroids, Items);
+            vector<Cluster> temp_clusters = Lloyds_Assignment(numof_clusters, d, centroids, Items);
             //update
             vector<Vector_Item> new_centroids;
 
@@ -56,12 +62,19 @@ int main(int argc, char* argv[]){
                 break;
             }
         }
-        // for(int i=0; i<num_of_centr; i++){
+        // for(int i=0; i<numof_clusters; i++){
         //     clusters.at(i).print_cluster();
         //     cout << endl;
         // }
 
+        //2-
+        vector<Vector_Item> centroids2;
+        K_means_pp(&centroids2, Items, numof_clusters);
+        cout << endl;
+        for(int i=0; i<numof_clusters; i++)
+            cout << centroids2.at(i).get_item_id() << endl;
     }
+
 
     //an einai curves
     else{

@@ -10,4 +10,4 @@ Vector_Item HyperCubeNN(vector<Vector_Item> Items, Vector_Item, vector<Hypercube
 
 Vector_Item ExactNN(vector<Vector_Item>, Vector_Item, int, int*);
 
-void write_results(string filename, int qID, int NnID, int dLSH, int dTrue, double tLSH, double tTrue);
+void write_results(int I, int A, int U, int k, vector<Cluster> clusters, double cltime);

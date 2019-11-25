@@ -28,4 +28,4 @@ hash.o: hash.cpp
 	$(CC) $(FLAGS) hash.cpp
 
 clean:
-	rm -f $(OBJS) $(OUT) output_*
+	rm -f $(OBJS) $(OUT) output*

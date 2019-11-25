@@ -102,11 +102,6 @@ void configuration(string conf_file, int* numof_clusters, int* numof_grids, int*
         flag=0;
     }
 
-    cout << "Number of clusters=" << *numof_clusters << endl;
-    cout << "Numner of grids=" << *numof_grids << endl;
-    cout << "Number of vector hash tables=" << *numofV_hashtables << endl;
-    cout << "Number of vector hash functions=" << *numofV_hashfuncts << endl;
-
     return;
 }
 
@@ -170,22 +165,22 @@ Vector_Item AproximateNN(vector<Vector_Item> Items, Vector_Item item, vector<Buc
     return Items.at(NN_position);
 }
 
-//grafei ta apotelesmata sto arxeio output
-void write_results(string filename, int qID, int NnID, int dLSH, int dTrue, double tLSH, double tTrue)
-{
-    ofstream file;
-    file.open (filename, ios::app); // append mode
+void write_results(int I, int A, int U, int k, vector<Cluster> clusters, double cltime){
 
-    if(file.is_open()){
-        file << "Query:" << qID << endl;
-        file << "Nearest neighbor:" << NnID << endl;
-        file << "distanceLSH:" << dLSH << endl;
-        file << "distanceTrue:" << dTrue << endl;
-        file << "tLSH:" << tLSH << " s." << endl;
-        file << "tTrue:" << tTrue << " s." << endl << endl;
+    ofstream Outfile;
+    Outfile.open("output.txt", ios::app);
+
+    string line;
+
+    Outfile << "Algorithm: I" << I << "A" << A << "U" << U << endl;
+
+    for(int i=0;i<k;i++){
+        Outfile << "CLUSTER-" << i+1 << " {size: " << clusters.at(i).get_positions().size() << ", centroid: " << clusters.at(i).get_center_id() << "}" << endl;
     }
 
-    file.close();
+    Outfile << "clustering_time: " << cltime << endl;
+
+    Outfile.close();
 
     return;
 }
