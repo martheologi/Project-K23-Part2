@@ -10,6 +10,32 @@
 #include "funct.h"
 #include "cluster_funct.h"
 
+int range_finder(vector<Vector_Item> centroids){
+    int dist;
+    int d = centroids.at(0).get_vector().size();
+    long int min = 1000000;
+
+    for(int i=0; i<centroids.size(); i++){
+        for(int j=i+1; j<centroids.size(); j++){
+            dist = distance_l1(centroids.at(i).get_vector(), centroids.at(j).get_vector(), d);
+            if(dist < min){
+                min = dist;
+            }
+        }
+    }
+    return min/2;
+}
+
+int Equal_centroids(vector<Vector_Item> c1, vector<Vector_Item> c2, int numof_clusters){
+    int d = c1.at(0).get_vector().size();
+    for(int i=0; i<numof_clusters; i++){
+        for(int x=0; x<d; x++){
+            if(c1.at(i).get_vector().at(x) != c2.at(i).get_vector().at(x)) return 0;
+        }
+    }
+    return 1;
+}
+
 void Random_Vector_Cetroids_Selection(vector<Vector_Item>* centroids, vector<Vector_Item> Items, int numof_clusters){
     random_device rd;
     default_random_engine generator(rd());
@@ -93,12 +119,67 @@ void K_means_pp(vector<Vector_Item>* centroids, vector<Vector_Item> Items, int n
         v[min_pos] = max;
         centroids->push_back(Items.at(min_pos));
     }
-
-    // for(int i=0; i<n; i++){
-    //     for(int j=0; j<n; j++){
-    //         cout << distances_array[i][j] << "\t";
-    //     }
-    //     cout << endl;
-    // }
     return;
+}
+
+vector<Cluster> Assignment_By_Range_Search(vector<Vector_Item> centroids, vector<Vector_Item> Items, int numof_clusters, int numofV_hashtables, int numofV_hashfuncts, int buckets, int W, int m, int M){
+    int c = Items.size();
+    vector<Cluster> clusters;
+    vector<Bucket>** HT = new vector<Bucket>* [numofV_hashtables];
+
+    for(int l=0; l<numofV_hashtables; l++){
+        HT[l] = new vector<Bucket>;
+        for(int i=0; i<buckets; i++){
+            Bucket b;
+            b.set_key(i);
+            HT[l]->push_back(b);
+        }
+    }
+    //HASHIIIIIING
+    //gia ka8e dianusma tou dataset
+    for(int n=0; n<c; n++){
+        Vector_Item item = Items.at(n);
+        int d = item.get_vector().size();
+
+        for(int l=0; l<numofV_hashtables; l++){
+            int key = hash_key(item, buckets, d, numofV_hashfuncts, W, M, m);
+            //to vazw sto hash table
+            if((key<0) || (key>=buckets)) continue;
+            HT[l]->at(key).push_pos(n);
+        }
+    }
+
+    int range = range_finder(centroids);
+    cout << "range" << range << endl;
+
+    for(int i=0; i<numof_clusters; i++){
+        int AprNN_dist;
+        Vector_Item NN_item = AproximateNN(Items, centroids.at(i), HT, buckets, numofV_hashfuncts, numofV_hashtables, m, M, W, &AprNN_dist);
+        cout << AprNN_dist << endl;
+    }
+
+    return clusters;
+}
+
+vector<Vector_Item> Mean_Vector_Update(vector<Cluster> temp_clusters, vector<Vector_Item> Items){
+    vector<Vector_Item> new_centroids;
+    int d = Items.at(0).get_vector().size();
+
+    //gia ka8e cluster
+    for(int i=0; i<temp_clusters.size(); i++){
+        int T = temp_clusters.at(i).get_positions().size(); //to plh8os twn dinusmatwn sto cluster
+        Vector_Item new_c;
+        new_c.set_id("new_c");
+        //gia ka8e xi
+        for(int x=0; x<d; x++){
+            //gia ka8e xi tou ka8e dianusmatos tou cluster
+            int V = 0;
+            for(int j=0; j<T; j++){
+                V += Items.at(temp_clusters.at(i).get_positions().at(j)).get_vector().at(x);  ///aparadektos kwdikas mh me rwtatex den katalavainw
+            }
+            new_c.push(V/T);
+        }
+        new_centroids.push_back(new_c);
+    }
+    return new_centroids;
 }
