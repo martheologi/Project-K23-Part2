@@ -33,3 +33,10 @@ void Vector_Item::print_item(){
 
     cout << endl;
 }
+
+int Vector_Item::equal(Vector_Item item){
+    for(int i=0; i<x.size(); i++){
+        if(x.at(i) != item.get_vector().at(i)) return 0;
+    }
+    return 1;
+}

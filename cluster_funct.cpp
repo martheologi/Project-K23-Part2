@@ -36,6 +36,28 @@ int Equal_centroids(vector<Vector_Item> c1, vector<Vector_Item> c2, int numof_cl
     return 1;
 }
 
+//elegxw an kapoio cluster einai adeio kai an einai pairnw kainourio kentro tuxaia kai ksanakanw assign
+vector<Cluster> Empty_cluster_check(int numof_clusters, vector<Cluster> temp_clusters, vector<Vector_Item> centroids, int d, vector<Vector_Item> Items){
+    int empty_pos = -1;
+    for(int i=0; i<numof_clusters; i++){
+        if(temp_clusters.at(i).get_positions().size()==0){
+            cout << "empty cluster" << endl;
+            empty_pos = i;
+            break;
+        }
+    }
+    if(empty_pos != -1){
+        centroids.clear();
+        temp_clusters.clear();
+        Random_Vector_Cetroids_Selection(&centroids, Items, numof_clusters);
+        for(int j=0; j<numof_clusters; j++)
+            cout << centroids.at(j).get_item_id() << endl;
+        temp_clusters = Lloyds_Assignment(numof_clusters, d, centroids, Items);
+    }
+
+    return temp_clusters;
+}
+
 void Random_Vector_Cetroids_Selection(vector<Vector_Item>* centroids, vector<Vector_Item> Items, int numof_clusters){
     random_device rd;
     default_random_engine generator(rd());
@@ -60,6 +82,8 @@ vector<Cluster> Lloyds_Assignment(int numof_clusters, int d, vector<Vector_Item>
         int nearest_centre_pos = -1;
 
         for(int j=0; j<numof_clusters; j++){
+            //an einai to kentro den to vazw
+            if(centroids.at(j).equal(Items.at(i))) continue;
             double dist = distance_l1(Items.at(i).get_vector(), centroids.at(j).get_vector(), d);
             //cout << dist << "\t";
             if(dist < min_dist){
@@ -70,6 +94,8 @@ vector<Cluster> Lloyds_Assignment(int numof_clusters, int d, vector<Vector_Item>
         clusters.at(nearest_centre_pos).push_position(i);
         //cout<< endl << Items.at(i).get_item_id() << " to center " << centroids.at(nearest_centre_pos).get_item_id() << endl;
     }
+    //checking if we have an empty cluster
+    clusters = Empty_cluster_check(numof_clusters, clusters, centroids, d, Items);
 
     return clusters;
 }
@@ -167,7 +193,7 @@ vector<Vector_Item> Mean_Vector_Update(vector<Cluster> temp_clusters, vector<Vec
 
     //gia ka8e cluster
     for(int i=0; i<temp_clusters.size(); i++){
-        int T = temp_clusters.at(i).get_positions().size(); //to plh8os twn dinusmatwn sto cluster
+        int T = temp_clusters.at(i).get_positions().size(); //to plh8os twn dianusmatwn sto cluster
         Vector_Item new_c;
         new_c.set_id("new_c");
         //gia ka8e xi
@@ -181,5 +207,54 @@ vector<Vector_Item> Mean_Vector_Update(vector<Cluster> temp_clusters, vector<Vec
         }
         new_centroids.push_back(new_c);
     }
+    return new_centroids;
+}
+
+vector<Vector_Item> PAM_alaLloyds(vector<Vector_Item> centroids, vector<Cluster> temp_clusters, vector<Vector_Item> Items){
+    vector<Vector_Item> new_centroids;
+    int d = Items.at(0).get_vector().size();
+
+    //gia ka8e cluster
+    for(int c=0; c<temp_clusters.size(); c++){
+        int min = 0;
+        int T = temp_clusters.at(c).get_positions().size(); //to plh8os twn dianusmatwn sto cluster
+
+        //upologizw to a8roisma tou kentrou apo ta shmeia
+        for(int t=0; t<T; t++){
+            Vector_Item item = Items.at(temp_clusters.at(c).get_positions().at(t));
+            min += distance_l1(centroids.at(c).get_vector(), item.get_vector(), d);
+        }
+        int min_pos = -1;
+        //gia ka8e dianusma sto cluster
+        for(int t=0; t<T; t++){
+            int sum = 0;
+            Vector_Item possibol_new_c = Items.at(temp_clusters.at(c).get_positions().at(t));
+            //vriskw to a8roisma twn apostasewn tou dianusmatos apo ta upoloipa dianusmata tou cluster
+            for(int i=0; i<T; i++){
+                if(t == i) continue;
+                Vector_Item item = Items.at(temp_clusters.at(c).get_positions().at(i));
+                sum += distance_l1(possibol_new_c.get_vector(), item.get_vector(), d);
+            }
+            //pros8etw kai thn apostash apo to kentro pou exw twra kai den einai sto cluster
+            sum += distance_l1(possibol_new_c.get_vector(), centroids.at(c).get_vector(), d);
+
+            if(sum < min){
+                min = sum;
+                min_pos = t;
+            }
+            if(sum == min){
+                continue;
+            }
+        }
+        if(min_pos != -1){
+            Vector_Item new_c = Items.at(temp_clusters.at(c).get_positions().at(min_pos));
+            new_centroids.push_back(new_c);
+        }
+        else{
+            Vector_Item new_c = centroids.at(c);
+            new_centroids.push_back(new_c);
+        }
+    }
+
     return new_centroids;
 }

@@ -17,6 +17,7 @@ class Vector_Item{
         string get_item_id();
         vector<double> get_vector();
         void print_item();
+        int equal(Vector_Item item);
 };
 
 class Bucket{
