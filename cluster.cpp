@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
-
+#include <ctime>
 #include "structs.h"
 #include "hash.h"
 #include "funct.h"
@@ -48,8 +48,10 @@ int main(int argc, char* argv[]){
                 for(int u=1; u<3; u++){
                     cout << "I"<< i << "-A" << a << "-U" << u << endl;
 
+                    std::clock_t start;
                     vector<Vector_Item> centroids;  //pinakas gia na krataw ta kentra
-                    //Initialization
+
+                    ///////////Initialization///////////
                     if(i==1)
                         Random_Vector_Cetroids_Selection(&centroids, Items, numof_clusters);
                     else
@@ -64,7 +66,7 @@ int main(int argc, char* argv[]){
                         vector<Cluster> temp_clusters;
                         vector<Vector_Item> new_centroids;
 
-                        //Assignment
+                        ////////////Assignment/////////////////
                         //if(a==1)
                             temp_clusters = Lloyds_Assignment(numof_clusters, d, centroids, Items);
                         //else
@@ -89,6 +91,8 @@ int main(int argc, char* argv[]){
 
                     centroids.clear();
                     clusters.clear();
+
+                    t_true = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;                    
                 }
             }
         }
@@ -96,7 +100,11 @@ int main(int argc, char* argv[]){
 
     //an einai curves
     else{
-
+        vector<Curve> Curves_dataset;
+        int c=Initialize_Curve_Dataset(INfile, &Curves_dataset);
+        int d = Curves_dataset.at(0).get_vector().size();
+        int buckets = c/8;
+        cout << "Dataset with "<< c << " curves" << endl;
     }
 
     return 0;
