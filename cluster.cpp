@@ -9,6 +9,7 @@
 #include "hash.h"
 #include "funct.h"
 #include "cluster_funct.h"
+#include "curve_funct.h"
 
 int main(int argc, char* argv[]){
 
@@ -40,61 +41,56 @@ int main(int argc, char* argv[]){
         int buckets = c/8;
         cout << "Dataset with "<< c << " items" << endl;
 
-        vector<Vector_Item> centroids;  //pinakas gia na krataw ta kentra
 
         //kanoume tis 8 periptwseis
-        //1-1-2
-        Random_Vector_Cetroids_Selection(&centroids, Items, numof_clusters);
-        // for(int i=0; i<numof_clusters; i++)
-        //     cout << centroids.at(i).get_item_id() << endl;
+        for(int i=1; i<3; i++){
+            for(int a=1; a<3; a++){
+                for(int u=1; u<3; u++){
+                    cout << "I"<< i << "-A" << a << "-U" << u << endl;
 
-        vector<Cluster> clusters;
-        int flag = 0;
+                    vector<Vector_Item> centroids;  //pinakas gia na krataw ta kentra
+                    //Initialization
+                    if(i==1)
+                        Random_Vector_Cetroids_Selection(&centroids, Items, numof_clusters);
+                    else
+                        K_means_pp(&centroids, Items, numof_clusters);
+                    // for(int i=0; i<numof_clusters; i++)
+                    //     cout << centroids.at(i).get_item_id() << endl;
 
-        while(1){
-            vector<Cluster> temp_clusters = Lloyds_Assignment(numof_clusters, d, centroids, Items);
-            //update
-            vector<Vector_Item> new_centroids = Mean_Vector_Update(temp_clusters, Items);
+                    vector<Cluster> clusters;
+                    int flag = 0;
 
-            if(Equal_centroids(centroids, new_centroids, numof_clusters)) flag = 1;
+                    while(1){
+                        vector<Cluster> temp_clusters;
+                        vector<Vector_Item> new_centroids;
 
-            if(flag == 1){
-                clusters = temp_clusters;
-                break;
+                        //Assignment
+                        //if(a==1)
+                            temp_clusters = Lloyds_Assignment(numof_clusters, d, centroids, Items);
+                        //else
+                            //temp_clusters = Assignment_By_Range_Search(centroids, Items, numof_clusters, numofV_hashtables, numofV_hashfuncts, buckets, W, m, M);
+                        //Update
+                        if(u==1)
+                            new_centroids = Mean_Vector_Update(temp_clusters, Items);
+                        else
+                            new_centroids = Mean_Vector_Update(temp_clusters, Items);
+                        if(Equal_centroids(centroids, new_centroids, numof_clusters)) flag = 1;
+
+                        if(flag == 1){
+                            clusters = temp_clusters;
+                            break;
+                        }
+                        centroids = new_centroids;
+                    }
+                    for(int i=0; i<numof_clusters; i++){
+                        clusters.at(i).print_cluster();
+                        cout << endl;
+                    }
+
+                    centroids.clear();
+                    clusters.clear();
+                }
             }
-            centroids = new_centroids;
-        }
-        for(int i=0; i<numof_clusters; i++){
-            clusters.at(i).print_cluster();
-            cout << endl;
-        }
-
-        //2-1-1
-        centroids.clear();
-        clusters.clear();
-
-        K_means_pp(&centroids, Items, numof_clusters);
-        cout << endl;
-
-        flag = 0;
-
-        while(1){
-            vector<Cluster> temp_clusters = Lloyds_Assignment(numof_clusters, d, centroids, Items);
-            //vector<Cluster> temp_clusters = Assignment_By_Range_Search(centroids, Items, numof_clusters, numofV_hashtables, numofV_hashfuncts, buckets, W, m, M);
-            //update
-            vector<Vector_Item> new_centroids = PAM_alaLloyds(centroids, temp_clusters, Items);
-
-            if(Equal_centroids(centroids, new_centroids, numof_clusters)) flag = 1;
-
-            if(flag == 1){ ///// == 1 !!!!!!!!!!!!!!!!! to afhnw etsi gia na kanei break pros to paron
-                clusters = temp_clusters;
-                break;
-            }
-            centroids = new_centroids;
-        }
-        for(int i=0; i<numof_clusters; i++){
-            clusters.at(i).print_cluster();
-            cout << endl;
         }
     }
 
