@@ -50,9 +50,9 @@ int main(int argc, char* argv[]){
 
                     vector<Vector_Item> centroids;  //pinakas gia na krataw ta kentra
                     //Initialization
-                    if(i==1)
+                    if(i == 1)
                         Random_Vector_Cetroids_Selection(&centroids, Items, numof_clusters);
-                    else
+                    else if(i == 2)
                         K_means_pp(&centroids, Items, numof_clusters);
                     // for(int i=0; i<numof_clusters; i++)
                     //     cout << centroids.at(i).get_item_id() << endl;
@@ -65,15 +65,16 @@ int main(int argc, char* argv[]){
                         vector<Vector_Item> new_centroids;
 
                         //Assignment
-                        //if(a==1)
+                        //if(a == 1)
                             temp_clusters = Lloyds_Assignment(numof_clusters, d, centroids, Items);
-                        //else
+                        //else if(a == 2)
                             //temp_clusters = Assignment_By_Range_Search(centroids, Items, numof_clusters, numofV_hashtables, numofV_hashfuncts, buckets, W, m, M);
                         //Update
-                        if(u==1)
+                        if(u == 1)
                             new_centroids = Mean_Vector_Update(temp_clusters, Items);
-                        else
-                            new_centroids = Mean_Vector_Update(temp_clusters, Items);
+                        else if(u == 2)
+                            new_centroids = PAM_alaLloyds(centroids, temp_clusters, Items);
+
                         if(Equal_centroids(centroids, new_centroids, numof_clusters)) flag = 1;
 
                         if(flag == 1){
