@@ -15,3 +15,5 @@ int hash_key(Vector_Item, int, int, int, int, int, long int);
 string get_vertice(Vector_Item, int, int, int, int, unordered_map<int, int> *);
 
 vector<Bucket>** HT_initialize(int numofV_hashtables, int buckets, int c, vector<Vector_Item> Items, int numofV_hashfuncts, int W, int M, int m);
+
+vector<Bucket>** Curves_HT_initialize(int L_grid, int buckets, int c, int W, int M, int m, int k_vec, int max_coord , int max_points, vector<Curve> Curves_dataset);

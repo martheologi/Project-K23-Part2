@@ -51,8 +51,8 @@ int Initialize_Dataset_Vector(string filename, vector<Vector_Item>* Items){
 
     file.open(filename);
     // extracting from the file
-    //while (file.good())
-    for(int i=0; i<100; i++)
+    while (file.good())
+    //for(int i=0; i<100; i++)
     {
         if (!getline (file, line)) break;
         c++;
@@ -166,10 +166,10 @@ Vector_Item AproximateNN(vector<Vector_Item> Items, Vector_Item item, vector<Buc
     return Items.at(NN_position);
 }
 
-void write_results(int I, int A, int U, int k, vector<Cluster> clusters, double cltime){
+void write_results(string outfile, int I, int A, int U, int k, vector<Cluster> clusters, double cltime){
 
     ofstream Outfile;
-    Outfile.open("output.txt", ios::app);
+    Outfile.open(outfile, ios::app);
 
     string line;
 

@@ -63,8 +63,8 @@ int Initialize_Curve_Dataset(string filename, vector<Curve>* Curves_dataset, int
     file.open(filename);
 
     // extracting from the file
-    //while (file.good())
-    for(int i=0; i<100; i++)
+    while (file.good())
+    //for(int i=0; i<100; i++)
     {
         if (!getline (file, line)) break;
         c++;

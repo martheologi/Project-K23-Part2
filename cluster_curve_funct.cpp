@@ -17,7 +17,7 @@ vector<Cluster> Empty_Curve_cluster_check(int numof_clusters, vector<Cluster> te
     int empty_pos = -1;
     for(int i=0; i<numof_clusters; i++){
         if(temp_clusters.at(i).get_positions().size()==0){
-            cout << "empty cluster" << endl;
+            //cout << "empty cluster" << endl;
             empty_pos = i;
             break;
         }
@@ -151,6 +151,87 @@ vector<Cluster> Curves_Lloyds_Assignment(int numof_clusters, vector<Curve> centr
     return clusters;
 }
 
+vector<Cluster> Curve_Assignment_By_Range_Search(vector<Curve> centroids, vector<Curve> Curves_dataset, vector<Bucket>** HT, int numof_clusters, int numof_grids, int numofV_hashfuncts, int buckets, int W, int m, int M, int max_coord, int max_points){
+    int c = Curves_dataset.size();
+
+    vector<Cluster> clusters;
+    for(int i=0; i<numof_clusters; i++){
+        Cluster cl;
+        cl.set_center_id(centroids.at(i).get_id());
+        clusters.push_back(cl);
+    }
+
+    //pinakas gia na krataw to cluster pou mpainei to antistoixo dianusma
+    int Curves_cluster[Curves_dataset.size()];
+    for(int i=0; i<Curves_dataset.size(); i++){
+        Curves_cluster[i] = -1;
+    }
+    //vriskw to key ka8e centroid
+    int keys[numof_clusters];
+
+    for(int i=0; i<numof_clusters; i++){
+        Vector_Item center = grid_curve_vector(centroids.at(i), max_points, max_coord);
+        int d = center.get_vector().size();
+        //vriskw se poia bucket antistoixei to center
+        for(int l=0; l<numof_grids; l++){
+            keys[i] = hash_key(center, buckets, d, numofV_hashfuncts, W, M, m);
+            if(HT[l]->at(keys[i]).get_point_pos().size() == 0) continue;
+
+            int key_flag = 0;
+            for(int k=0; k<i; k++){
+              if(i == k) continue;
+              if(keys[k] == keys[i])
+              key_flag = 1;
+            }
+            //vazw to bucket sto cluster tou center
+            for(int b=0; b<HT[l]->at(keys[i]).get_point_pos().size(); b++){
+                //elegxw an to centroid antistoixei sto idio bucket me kapoio allo centroid
+                //an anhkei se idio bucket den kanw tipota kai 8a ta valw meta me brutforce
+                if(key_flag == 1) {
+                    continue;
+                    cout << "idia bucketttt "<<endl;
+                }
+                //an to dianusma den exei mpei se kapoio allo cluster
+                if(Curves_cluster[HT[l]->at(keys[i]).get_point_pos().at(b)] == -1){
+                    clusters.at(i).push_position(HT[l]->at(keys[i]).get_point_pos().at(b));
+                    Curves_cluster[HT[l]->at(keys[i]).get_point_pos().at(b)] = i;
+                }
+            }
+        }
+    }
+    //gia ta upoloipa dianusmata
+    for(int n=0; n<Curves_dataset.size(); n++){
+        double min_dist = 1000000.00;
+        int nearest_centre_pos = -1;
+
+        if(Curves_cluster[n] != -1)
+            continue;
+
+        Curve curve = Curves_dataset.at(n);
+
+        for(int j=0; j<numof_clusters; j++){
+            //an einai to kentro den to vazw
+            if(centroids.at(j).equal(curve)) continue;
+            int m1 = curve.get_points().size();
+            int m2 = centroids.at(j).get_points().size();
+            double **table = DTW(curve, centroids.at(j));
+            double dist = table[m1-1][m2-1];
+            //double dist = distance_l1(item.get_vector(), centroids.at(j).get_vector(), d);
+            if(dist < min_dist){
+                min_dist = dist;
+                nearest_centre_pos = j;
+            }
+            for(int t=0; t<m1+1; t++)
+                delete[] table[t];
+            delete[] table;
+        }
+        clusters.at(nearest_centre_pos).push_position(n);
+        Curves_cluster[n] = nearest_centre_pos;
+    }
+
+    clusters = Empty_Curve_cluster_check(numof_clusters, clusters, centroids, Curves_dataset);
+    return clusters;
+}
 
 vector<Curve> Curves_PAM_alaLloyds(vector<Curve> centroids, vector<Cluster> temp_clusters, vector<Curve> Curves_dataset){
     vector<Curve> new_centroids;

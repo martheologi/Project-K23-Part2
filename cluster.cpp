@@ -49,17 +49,21 @@ int main(int argc, char* argv[]){
                 for(int u=1; u<3; u++){
                     cout << "I"<< i << "-A" << a << "-U" << u << endl;
 
-                    std::clock_t start;
                     vector<Vector_Item> centroids;  //pinakas gia na krataw ta kentra
+                    vector<Cluster> clusters;
+                    vector<Bucket>** HT = NULL;
+                    if(a==2)
+                        HT =  HT_initialize(numofV_hashtables, buckets, c, Items, numofV_hashfuncts, W, M, m);
+
+                    std::clock_t start;
+                    start = std::clock();
+
                     //Initialization
                     if(i == 1)
                         Random_Vector_Cetroids_Selection(&centroids, Items, numof_clusters);
                     else if(i == 2)
                         K_means_pp(&centroids, Items, numof_clusters);
-                    // for(int i=0; i<numof_clusters; i++)
-                    //     cout << centroids.at(i).get_item_id() << endl;
 
-                    vector<Cluster> clusters;
                     int flag = 0;
 
                     int it = 0;
@@ -71,10 +75,6 @@ int main(int argc, char* argv[]){
                         if(a == 1)
                             temp_clusters = Lloyds_Assignment(numof_clusters, d, centroids, Items);
                         else if(a == 2){
-                            vector<Bucket>** HT;
-                            if(it == 0){
-                                 HT =  HT_initialize(numofV_hashtables, buckets, c, Items, numofV_hashfuncts, W, M, m);
-                            }
                             it++;
                             temp_clusters = Assignment_By_Range_Search(centroids, Items, HT, numof_clusters, numofV_hashtables, numofV_hashfuncts, buckets, W, m, M);
                         }
@@ -85,21 +85,28 @@ int main(int argc, char* argv[]){
                             new_centroids = Mean_Vector_Update(temp_clusters, Items);
 
                         if(Equal_centroids(centroids, new_centroids, numof_clusters)) flag = 1;
-                        if((flag == 1) || (it == 100)){
+                        if((flag == 1) || (it == 10)){
                             clusters = temp_clusters;
                             break;
                         }
                         centroids = new_centroids;
                     }
-                    for(int i=0; i<numof_clusters; i++){
-                        clusters.at(i).print_cluster();
-                        cout << endl;
-                    }
+                    double time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+                    write_results(OUTfile, i, a, u, numof_clusters, clusters, time);
+                    //
+                    // for(int i=0; i<numof_clusters; i++){
+                    //     clusters.at(i).print_cluster();
+                    //     cout << endl;
+                    // }
 
                     centroids.clear();
                     clusters.clear();
-
-                    double t_true = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+                    if(HT != NULL){
+                        for(int l=0; l<numofV_hashtables; l++){
+                            delete HT[l];
+                        }
+                        delete[] HT;
+                    }
                 }
             }
         }
@@ -121,51 +128,68 @@ int main(int argc, char* argv[]){
                 for(int u=1; u<3; u++){
                     cout << "I"<< i << "-A" << a << "-U" << u << endl;
 
-                    std::clock_t start;
                     vector<Curve> centroids;  //pinakas gia na krataw ta kentra
+                    vector<Cluster> clusters;
+                    vector<Bucket>** HT = NULL;
+                    if(a==2)
+                        HT = Curves_HT_initialize(numof_grids, buckets, c, W, M, m, numofV_hashfuncts, max_coord , max_points, Curves_dataset);
+
+                    std::clock_t start;
+                    start = std::clock();
+
                     //Initialization
                     if(i == 1)
                         Curve_Random_Vector_Cetroids_Selection(&centroids, Curves_dataset, numof_clusters);
                     else if(i == 2)
                         Curve_K_means_pp(&centroids, Curves_dataset, numof_clusters);
 
-                    // for(int i=0; i<numof_clusters; i++)
-                    //     cout << centroids.at(i).get_id() << endl;
-
-                    vector<Cluster> clusters;
                     int flag = 0;
+                    int it = 0;
 
                     while(1){
                         vector<Cluster> temp_clusters;
                         vector<Curve> new_centroids;
 
                         //Assignment
-                        //if(a == 1)
+                        if(a == 1)
                             temp_clusters = Curves_Lloyds_Assignment(numof_clusters, centroids, Curves_dataset);
-                        //else if(a == 2){
-                      //  if(u == 1)
+                        else if(a == 2){
+                            it++;
+                            temp_clusters = Curve_Assignment_By_Range_Search(centroids, Curves_dataset, HT, numof_clusters, numof_grids, numofV_hashfuncts, buckets, W, m, M, max_coord, max_points);
+                        }
+                        //Update
+                        if(u == 1)
+                           new_centroids = Curves_PAM_alaLloyds(centroids, temp_clusters, Curves_dataset);
+                        else if(u == 2) break;
                             //new_centroids = Curve_Mean_Vector_Update(temp_clusters, Curves_dataset);
-                        //else if(u == 2)
-                            new_centroids = Curves_PAM_alaLloyds(centroids, temp_clusters, Curves_dataset);
 
                         if(Equal_Curve_centroids(centroids, new_centroids, numof_clusters)) flag = 1;
 
-                        if(flag == 1){
+                        if((flag == 1) || (it == 10)){
                             clusters = temp_clusters;
                             break;
                         }
                         centroids = new_centroids;
                     }
 
-                    for(int i=0; i<numof_clusters; i++){
-                      clusters.at(i).print_cluster();
-                      cout << endl;
+                    double time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+
+                    if(clusters.size() != 0){
+                        write_results(OUTfile, i, a, u, numof_clusters, clusters, time);
+                        // for(int i=0; i<numof_clusters; i++){
+                        //   clusters.at(i).print_cluster();
+                        //   cout << endl;
+                        // }
                     }
 
                     centroids.clear();
                     clusters.clear();
-
-                    double t_true = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+                    if(HT != NULL){
+                        for(int l=0; l<numof_grids; l++){
+                            delete HT[l];
+                        }
+                        delete[] HT;
+                    }
                 }
             }
         }

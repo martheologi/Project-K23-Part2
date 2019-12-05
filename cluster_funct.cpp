@@ -183,15 +183,17 @@ vector<Cluster> Assignment_By_Range_Search(vector<Vector_Item> centroids, vector
         //vriskw se poia bucket antistoixei to center
         for(int l=0; l<numofV_hashtables; l++){
             keys[i] = hash_key(center, buckets, d, numofV_hashfuncts, W, M, m);
+            if(HT[l]->at(keys[i]).get_point_pos().size() == 0) continue;
+
+            int key_flag = 0;
+            for(int k=0; k<i; k++){
+              if(i == k) continue;
+              if(keys[k] == keys[i])
+              key_flag = 1;
+            }
             //vazw to bucket sto cluster tou center
             for(int b=0; b<HT[l]->at(keys[i]).get_point_pos().size(); b++){
                 //elegxw an to centroid antistoixei sto idio bucket me kapoio allo centroid
-                int key_flag = 0;
-                for(int k=0; k<numof_clusters; k++){
-                    if(i == k) continue;
-                    if(keys[k] == keys[i])
-                        key_flag = 1;
-                }
                 //an anhkei se idio bucket den kanw tipota kai 8a ta valw meta me brutforce
                 if(key_flag == 1) {
                     continue;
@@ -229,11 +231,7 @@ vector<Cluster> Assignment_By_Range_Search(vector<Vector_Item> centroids, vector
     }
 
     clusters = Empty_cluster_check(numof_clusters, clusters, centroids, d, Items);
-    //
-    // for(int i=0; i<numof_clusters; i++){
-    //     clusters.at(i).print_cluster();
-    //     cout << endl;
-    // }
+
     return clusters;
 }
 

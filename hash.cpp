@@ -12,6 +12,7 @@
 #include "funct.h"
 #include "hash.h"
 #include "cluster_funct.h"
+#include "curve_funct.h"
 
 using namespace std;
 
@@ -158,6 +159,35 @@ vector<Bucket>** HT_initialize(int numofV_hashtables, int buckets, int c, vector
             HT[l]->at(key).push_pos(n);
         }
     }
-    cout << "eftiaksa lsh" << endl;
+    return HT;
+}
+
+vector<Bucket>** Curves_HT_initialize(int L_grid, int buckets, int c, int W, int M, int m, int k_vec, int max_coord , int max_points, vector<Curve> Curves_dataset){
+    //arxikopoiw ta hash tables
+    vector<Bucket>** HT = new vector<Bucket>* [L_grid];  //ena gia ka8e grid pou 8a mou dwsoun oi kampules
+
+    for(int l=0; l<L_grid; l++){
+        HT[l] = new vector<Bucket>;
+        for(int i=0; i<buckets; i++){
+            Bucket b;
+            b.set_key(i);
+            HT[l]->push_back(b);
+        }
+    }
+    //gia ka8e kampulh
+    for (int n=0; n<c; n++){
+        Curve curve = Curves_dataset.at(n);
+
+        for(int l=0; l<L_grid; l++){
+            //ftiaxnw to grid ths kampulhs
+            Vector_Item item = grid_curve_vector(curve, max_points, max_coord);
+
+            //to vazw se hash table
+            int key = hash_key(item, buckets, max_points*2, k_vec, W, M, m);
+            if((key<0) || (key>=buckets)) continue;
+
+            HT[l]->at(key).push_pos(n);
+        }
+    }
     return HT;
 }
