@@ -5,11 +5,13 @@
 #include <vector>
 #include <string>
 #include <ctime>
+
 #include "structs.h"
 #include "hash.h"
 #include "funct.h"
 #include "cluster_funct.h"
 #include "curve_funct.h"
+#include "cluster_curve_funct.h"
 
 int main(int argc, char* argv[]){
 
@@ -41,7 +43,6 @@ int main(int argc, char* argv[]){
         int buckets = c/8;
         cout << "Dataset with "<< c << " items" << endl;
 
-
         //kanoume tis 8 periptwseis
         for(int i=1; i<3; i++){
             for(int a=1; a<3; a++){
@@ -61,24 +62,30 @@ int main(int argc, char* argv[]){
                     vector<Cluster> clusters;
                     int flag = 0;
 
+                    int it = 0;
                     while(1){
                         vector<Cluster> temp_clusters;
                         vector<Vector_Item> new_centroids;
 
                         //Assignment
-                        //if(a == 1)
+                        if(a == 1)
                             temp_clusters = Lloyds_Assignment(numof_clusters, d, centroids, Items);
-                        //else if(a == 2)
-                            //temp_clusters = Assignment_By_Range_Search(centroids, Items, numof_clusters, numofV_hashtables, numofV_hashfuncts, buckets, W, m, M);
+                        else if(a == 2){
+                            vector<Bucket>** HT;
+                            if(it == 0){
+                                 HT =  HT_initialize(numofV_hashtables, buckets, c, Items, numofV_hashfuncts, W, M, m);
+                            }
+                            it++;
+                            temp_clusters = Assignment_By_Range_Search(centroids, Items, HT, numof_clusters, numofV_hashtables, numofV_hashfuncts, buckets, W, m, M);
+                        }
                         //Update
                         if(u == 1)
-                            new_centroids = Mean_Vector_Update(temp_clusters, Items);
-                        else if(u == 2)
                             new_centroids = PAM_alaLloyds(centroids, temp_clusters, Items);
+                        else if(u == 2)
+                            new_centroids = Mean_Vector_Update(temp_clusters, Items);
 
                         if(Equal_centroids(centroids, new_centroids, numof_clusters)) flag = 1;
-
-                        if(flag == 1){
+                        if((flag == 1) || (it == 100)){
                             clusters = temp_clusters;
                             break;
                         }
@@ -92,7 +99,7 @@ int main(int argc, char* argv[]){
                     centroids.clear();
                     clusters.clear();
 
-                    t_true = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+                    double t_true = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
                 }
             }
         }
@@ -101,9 +108,67 @@ int main(int argc, char* argv[]){
     //an einai curves
     else{
         vector<Curve> Curves_dataset;
-        int c=Initialize_Curve_Dataset(INfile, &Curves_dataset);
+        int max_points = 0;
+        double max_coord = 0;
+
+        int c = Initialize_Curve_Dataset(INfile, &Curves_dataset, &max_points, &max_coord);
         int buckets = c/8;
         cout << "Dataset with "<< c << " curves" << endl;
+
+        //kanoume tis 8 periptwseis
+        for(int i=1; i<3; i++){
+            for(int a=1; a<3; a++){
+                for(int u=1; u<3; u++){
+                    cout << "I"<< i << "-A" << a << "-U" << u << endl;
+
+                    std::clock_t start;
+                    vector<Curve> centroids;  //pinakas gia na krataw ta kentra
+                    //Initialization
+                    if(i == 1)
+                        Curve_Random_Vector_Cetroids_Selection(&centroids, Curves_dataset, numof_clusters);
+                    else if(i == 2)
+                        Curve_K_means_pp(&centroids, Curves_dataset, numof_clusters);
+
+                    // for(int i=0; i<numof_clusters; i++)
+                    //     cout << centroids.at(i).get_id() << endl;
+
+                    vector<Cluster> clusters;
+                    int flag = 0;
+
+                    while(1){
+                        vector<Cluster> temp_clusters;
+                        vector<Curve> new_centroids;
+
+                        //Assignment
+                        //if(a == 1)
+                            temp_clusters = Curves_Lloyds_Assignment(numof_clusters, centroids, Curves_dataset);
+                        //else if(a == 2){
+                      //  if(u == 1)
+                            //new_centroids = Curve_Mean_Vector_Update(temp_clusters, Curves_dataset);
+                        //else if(u == 2)
+                            new_centroids = Curves_PAM_alaLloyds(centroids, temp_clusters, Curves_dataset);
+
+                        if(Equal_Curve_centroids(centroids, new_centroids, numof_clusters)) flag = 1;
+
+                        if(flag == 1){
+                            clusters = temp_clusters;
+                            break;
+                        }
+                        centroids = new_centroids;
+                    }
+
+                    for(int i=0; i<numof_clusters; i++){
+                      clusters.at(i).print_cluster();
+                      cout << endl;
+                    }
+
+                    centroids.clear();
+                    clusters.clear();
+
+                    double t_true = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+                }
+            }
+        }
     }
 
     return 0;

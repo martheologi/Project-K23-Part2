@@ -51,7 +51,8 @@ int Initialize_Dataset_Vector(string filename, vector<Vector_Item>* Items){
 
     file.open(filename);
     // extracting from the file
-    while (file.good())
+    //while (file.good())
+    for(int i=0; i<100; i++)
     {
         if (!getline (file, line)) break;
         c++;

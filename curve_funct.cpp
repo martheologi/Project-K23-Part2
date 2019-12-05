@@ -57,17 +57,21 @@ Curve Initialize_Curve(string line, double* max_coord){
 int Initialize_Curve_Dataset(string filename, vector<Curve>* Curves_dataset, int* max_points, double* max_coord){
     string digits = "";
     string line;
-    int c = 0;
+    int c = -1;
     fstream file;
 
     file.open(filename);
 
     // extracting from the file
-    while (file.good())
-    //for(int i=0; i<100; i++)
+    //while (file.good())
+    for(int i=0; i<100; i++)
     {
         if (!getline (file, line)) break;
         c++;
+        if(c == 0) {
+            cout << line << endl;
+            continue;
+        }
 
         Curve curve = Initialize_Curve(line, max_coord);
 

@@ -13,3 +13,5 @@ int f_generator(int, unordered_map<int, int>*);
 int hash_key(Vector_Item, int, int, int, int, int, long int);
 
 string get_vertice(Vector_Item, int, int, int, int, unordered_map<int, int> *);
+
+vector<Bucket>** HT_initialize(int numofV_hashtables, int buckets, int c, vector<Vector_Item> Items, int numofV_hashfuncts, int W, int M, int m);

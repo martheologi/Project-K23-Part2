@@ -131,3 +131,33 @@ string get_vertice(Vector_Item item, int k, int W, int m, int Modulus, unordered
     }
     return vertice;
 }
+
+vector<Bucket>** HT_initialize(int numofV_hashtables, int buckets, int c, vector<Vector_Item> Items, int numofV_hashfuncts, int W, int M, int m){
+    vector<Bucket>** HT;
+    HT = new vector<Bucket>* [numofV_hashtables];
+
+    for(int l=0; l<numofV_hashtables; l++){
+        HT[l] = new vector<Bucket>;
+        for(int i=0; i<buckets; i++){
+            Bucket b;
+            b.set_key(i);
+            HT[l]->push_back(b);
+        }
+    }
+
+    //HASHIIIIIING
+    //gia ka8e dianusma tou dataset
+    for(int n=0; n<c; n++){
+        Vector_Item item = Items.at(n);
+        int d = item.get_vector().size();
+
+        for(int l=0; l<numofV_hashtables; l++){
+            int key = hash_key(item, buckets, d, numofV_hashfuncts, W, M, m);
+            //to vazw sto hash table
+            if((key<0) || (key>=buckets)) continue;
+            HT[l]->at(key).push_pos(n);
+        }
+    }
+    cout << "eftiaksa lsh" << endl;
+    return HT;
+}

@@ -41,7 +41,7 @@ vector<Cluster> Empty_cluster_check(int numof_clusters, vector<Cluster> temp_clu
     int empty_pos = -1;
     for(int i=0; i<numof_clusters; i++){
         if(temp_clusters.at(i).get_positions().size()==0){
-            cout << "empty cluster" << endl;
+            //cout << "empty cluster" << endl;
             empty_pos = i;
             break;
         }
@@ -50,8 +50,8 @@ vector<Cluster> Empty_cluster_check(int numof_clusters, vector<Cluster> temp_clu
         centroids.clear();
         temp_clusters.clear();
         Random_Vector_Cetroids_Selection(&centroids, Items, numof_clusters);
-        for(int j=0; j<numof_clusters; j++)
-            cout << centroids.at(j).get_item_id() << endl;
+        // for(int j=0; j<numof_clusters; j++)
+        //     cout << centroids.at(j).get_item_id() << endl;
         temp_clusters = Lloyds_Assignment(numof_clusters, d, centroids, Items);
     }
 
@@ -61,7 +61,7 @@ vector<Cluster> Empty_cluster_check(int numof_clusters, vector<Cluster> temp_clu
 void Random_Vector_Cetroids_Selection(vector<Vector_Item>* centroids, vector<Vector_Item> Items, int numof_clusters){
     random_device rd;
     default_random_engine generator(rd());
-    uniform_int_distribution<int> distribution(0,Items.size());
+    uniform_int_distribution<int> distribution(0,Items.size()-1);
 
     for(int i=0; i<numof_clusters; i++){
         int random_centr_pos = distribution(generator);
@@ -103,7 +103,11 @@ vector<Cluster> Lloyds_Assignment(int numof_clusters, int d, vector<Vector_Item>
 void K_means_pp(vector<Vector_Item>* centroids, vector<Vector_Item> Items, int numof_clusters){
     int n = Items.size();
     int d = Items.at(0).get_vector().size();
-    int distances_array[n][n];
+    double** distances_array = new double* [n];
+
+    for(int i=0; i<n; i++){
+        distances_array[i] = new double [n];
+    }
 
     for(int i=0; i<n; i++){
         for(int j=0; j<n; j++){
@@ -145,45 +149,91 @@ void K_means_pp(vector<Vector_Item>* centroids, vector<Vector_Item> Items, int n
         v[min_pos] = max;
         centroids->push_back(Items.at(min_pos));
     }
+
+    for(int i=0; i<n; i++){
+        delete[] distances_array[i];
+    }
+    delete[] distances_array;
+
     return;
 }
 
-vector<Cluster> Assignment_By_Range_Search(vector<Vector_Item> centroids, vector<Vector_Item> Items, int numof_clusters, int numofV_hashtables, int numofV_hashfuncts, int buckets, int W, int m, int M){
+vector<Cluster> Assignment_By_Range_Search(vector<Vector_Item> centroids, vector<Vector_Item> Items, vector<Bucket>** HT, int numof_clusters, int numofV_hashtables, int numofV_hashfuncts, int buckets, int W, int m, int M){
+
     int c = Items.size();
+    int d = centroids.at(0).get_vector().size();
+
     vector<Cluster> clusters;
-    vector<Bucket>** HT = new vector<Bucket>* [numofV_hashtables];
-
-    for(int l=0; l<numofV_hashtables; l++){
-        HT[l] = new vector<Bucket>;
-        for(int i=0; i<buckets; i++){
-            Bucket b;
-            b.set_key(i);
-            HT[l]->push_back(b);
-        }
-    }
-    //HASHIIIIIING
-    //gia ka8e dianusma tou dataset
-    for(int n=0; n<c; n++){
-        Vector_Item item = Items.at(n);
-        int d = item.get_vector().size();
-
-        for(int l=0; l<numofV_hashtables; l++){
-            int key = hash_key(item, buckets, d, numofV_hashfuncts, W, M, m);
-            //to vazw sto hash table
-            if((key<0) || (key>=buckets)) continue;
-            HT[l]->at(key).push_pos(n);
-        }
+    for(int i=0; i<numof_clusters; i++){
+        Cluster cl;
+        cl.set_center_id(centroids.at(i).get_item_id());
+        clusters.push_back(cl);
     }
 
-    int range = range_finder(centroids);
-    cout << "range" << range << endl;
+    //pinakas gia na krataw to cluster pou mpainei to antistoixo dianusma
+    int Items_cluster[Items.size()];
+    for(int i=0; i<Items.size(); i++){
+        Items_cluster[i] = -1;
+    }
+    //vriskw to key ka8e centroid
+    int keys[numof_clusters];
 
     for(int i=0; i<numof_clusters; i++){
-        int AprNN_dist;
-        Vector_Item NN_item = AproximateNN(Items, centroids.at(i), HT, buckets, numofV_hashfuncts, numofV_hashtables, m, M, W, &AprNN_dist);
-        cout << AprNN_dist << endl;
+        Vector_Item center = centroids.at(i);
+        //vriskw se poia bucket antistoixei to center
+        for(int l=0; l<numofV_hashtables; l++){
+            keys[i] = hash_key(center, buckets, d, numofV_hashfuncts, W, M, m);
+            //vazw to bucket sto cluster tou center
+            for(int b=0; b<HT[l]->at(keys[i]).get_point_pos().size(); b++){
+                //elegxw an to centroid antistoixei sto idio bucket me kapoio allo centroid
+                int key_flag = 0;
+                for(int k=0; k<numof_clusters; k++){
+                    if(i == k) continue;
+                    if(keys[k] == keys[i])
+                        key_flag = 1;
+                }
+                //an anhkei se idio bucket den kanw tipota kai 8a ta valw meta me brutforce
+                if(key_flag == 1) {
+                    continue;
+                    cout << "idia bucketttt "<<endl;
+                }
+                //an to dianusma den exei mpei se kapoio allo cluster
+                if(Items_cluster[HT[l]->at(keys[i]).get_point_pos().at(b)] == -1){
+                    clusters.at(i).push_position(HT[l]->at(keys[i]).get_point_pos().at(b));
+                    Items_cluster[HT[l]->at(keys[i]).get_point_pos().at(b)] = i;
+                }
+            }
+        }
+    }
+    //gia ta upoloipa dianusmata
+    for(int n=0; n<Items.size(); n++){
+        double min_dist = 1000000.00;
+        int nearest_centre_pos = -1;
+
+        if(Items_cluster[n] != -1)
+            continue;
+
+        Vector_Item item = Items.at(n);
+
+        for(int j=0; j<numof_clusters; j++){
+            //an einai to kentro den to vazw
+            if(centroids.at(j).equal(item)) continue;
+            double dist = distance_l1(item.get_vector(), centroids.at(j).get_vector(), d);
+            if(dist < min_dist){
+                min_dist = dist;
+                nearest_centre_pos = j;
+            }
+        }
+        clusters.at(nearest_centre_pos).push_position(n);
+        Items_cluster[n] = nearest_centre_pos;
     }
 
+    clusters = Empty_cluster_check(numof_clusters, clusters, centroids, d, Items);
+    //
+    // for(int i=0; i<numof_clusters; i++){
+    //     clusters.at(i).print_cluster();
+    //     cout << endl;
+    // }
     return clusters;
 }
 
