@@ -289,19 +289,45 @@ Curve curve_AproximateNN(vector<Curve> Curves_dataset, Curve curve, vector<Bucke
     return Curves_dataset.at(NN_position);
 }
 
-void write_curve_results(string Method, string HashFunction, string OUTfile, string Q_curve, string ExactNN_curve, string NN_curve, double AprNN_dist, double ExactNN_dist){
+void write_curve_results(string outfile, int I, int A, int U, int k, vector<Cluster> clusters, vector<Curve> centroids, double cltime, int complete, vector<double> s, double stotal){
 
-    ofstream file;
-    file.open (OUTfile, ios::app); // append mode
+    ofstream Outfile;
+    Outfile.open(outfile, ios::app);
 
-    if(file.is_open()){
-        file << "Query: " << Q_curve << endl;
-        file << "Method: " << Method << endl;
-        file << "HashFunction: " << HashFunction << endl;
-        file << "Found Nearest neighbor: " << NN_curve << endl;
-        file << "True Nearest neighbor: " << ExactNN_curve << endl;
-        file << "distanceFound: " << AprNN_dist << endl;
-        file << "distanceTrue: " << ExactNN_dist << endl;
-        file << endl;
+    string line;
+
+    Outfile << "Algorithm: I" << I << "A" << A << "U" << U << endl;
+
+    for(int i=0;i<k;i++){
+        if(clusters.at(i).get_center_id() == "new_c"){
+            Outfile << "CLUSTER-" << i+1 << " {size: " << clusters.at(i).get_positions().size() << ", centroid: ( ";
+            for(int j=0; j<centroids.at(i).get_m(); j++)
+                Outfile << "(" << centroids.at(i).get_points().at(i).get_x() << " , " << centroids.at(i).get_points().at(i).get_y() << ") ";
+            Outfile << ") }" << endl;
+        }
+        else
+            Outfile << "CLUSTER-" << i+1 << " {size: " << clusters.at(i).get_positions().size() << ", centroid: " << clusters.at(i).get_center_id() << "}" << endl;
     }
+
+    Outfile << "clustering_time: " << cltime << endl;
+
+    Outfile << "Silhouette: [ ";
+    for(int i=0; i<centroids.size(); i++){
+        Outfile << s.at(i) << ", ";
+    }
+    Outfile << "stotal = " << stotal << " ]" << endl;
+
+    if(complete){
+        for(int i=0; i<clusters.size(); i++){
+            Outfile << "Cluster-" << i+1 << " { ";
+            for(int j=0; j<clusters.at(i).get_positions().size(); j++)
+                Outfile << clusters.at(i).get_positions().at(j) << " ";
+            Outfile << " }" << endl;
+        }
+    }
+
+    Outfile << endl;
+    Outfile.close();
+
+    return;
 }

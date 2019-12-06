@@ -4,11 +4,14 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include<algorithm>
 
 #include "structs.h"
 #include "hash.h"
 #include "funct.h"
 #include "cluster_funct.h"
+#include "curve_funct.h"
+#include "cluster_curve_funct.h"
 
 int range_finder(vector<Vector_Item> centroids){
     int dist;
@@ -247,7 +250,7 @@ vector<Vector_Item> Mean_Vector_Update(vector<Cluster> temp_clusters, vector<Vec
         //gia ka8e xi
         for(int x=0; x<d; x++){
             //gia ka8e xi tou ka8e dianusmatos tou cluster
-            int V = 0;
+            double V = 0.0;
             for(int j=0; j<T; j++){
                 V += Items.at(temp_clusters.at(i).get_positions().at(j)).get_vector().at(x);  ///aparadektos kwdikas mh me rwtatex den katalavainw
             }
@@ -305,4 +308,64 @@ vector<Vector_Item> PAM_alaLloyds(vector<Vector_Item> centroids, vector<Cluster>
     }
 
     return new_centroids;
+}
+
+double average_distance(Vector_Item item, int cluster_id, vector<Cluster> clusters, vector<Vector_Item> Items, vector<Vector_Item> centroids){
+    int d = Items.at(0).get_vector().size();
+    double a = 0.0;
+    double b = 0.0;
+
+    //vriskw to meso oro twn apostasewn tou shmeiou apo ta upoloipa shmeia tou cluster sto opoio anhkei
+    for(int i=0; i<clusters.at(cluster_id).get_positions().size(); i++){
+        Vector_Item tmp_item = Items.at(clusters.at(cluster_id).get_positions().at(i));
+        double dist = distance_l1(item.get_vector(), tmp_item.get_vector(), d);
+        a += dist;
+    }
+    a = a/clusters.at(cluster_id).get_positions().size();
+
+    //vriskw to epomeno kontinotero kentro
+    long int min = 1000000;
+    int second_centroid = -1;
+    for(int i=0; i<centroids.size(); i++){
+        if(i == cluster_id) continue;
+        int dist = distance_l1(item.get_vector(), centroids.at(i).get_vector(), d);
+        if(dist < min){
+            min = dist;
+            second_centroid = i;
+        }
+    }
+    //vriskw to meso oro twn apostasewn tou shmeiou apo ta upoloipa shmeia tou epomenou kontinoterou cluster
+    for(int i=0; i<clusters.at(second_centroid).get_positions().size(); i++){
+        Vector_Item tmp_item = Items.at(clusters.at(second_centroid).get_positions().at(i));
+        double dist = distance_l1(item.get_vector(), tmp_item.get_vector(), d);
+        b += dist;
+    }
+    b = b/clusters.at(second_centroid).get_positions().size();
+
+    double si = (b - a)/(max(a,b));
+
+    return si;
+}
+
+vector<double> Silhouette(vector<Cluster> clusters, vector<Vector_Item> Items, vector<Vector_Item> centroids, double* stotal){
+    vector<double> s;
+
+    //gia ka8e cluster vriskw to average s(p) of points
+    for(int c=0; c<centroids.size(); c++){
+        double sp = 0.0;
+
+        for(int i=0; i<clusters.at(c).get_positions().size(); i++){
+            Vector_Item item = Items.at(clusters.at(c).get_positions().at(i));
+            double si = average_distance(item, c, clusters, Items, centroids);
+            sp += si;
+        }
+
+        sp = sp/clusters.at(c).get_positions().size();
+        *stotal += sp;
+        s.push_back(sp);
+    }
+
+    *stotal = *stotal/centroids.size();
+
+    return s;
 }

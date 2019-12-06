@@ -11,3 +11,7 @@ vector<Cluster> Curves_Lloyds_Assignment(int numof_clusters, vector<Curve> centr
 vector<Cluster> Curve_Assignment_By_Range_Search(vector<Curve> centroids, vector<Curve> Curves_dataset, vector<Bucket>** HT, int numof_clusters, int numofV_hashtables, int numofV_hashfuncts, int buckets, int W, int m, int M, int max_coord, int max_points);
 
 vector<Curve> Curves_PAM_alaLloyds(vector<Curve> centroids, vector<Cluster> temp_clusters, vector<Curve> Curves_dataset);
+
+double average_curve_distance(Curve curve, int cluster_id, vector<Cluster> clusters, vector<Curve> Curves_dataset, vector<Curve> centroids);
+
+vector<double> Curve_Silhouette(vector<Cluster> clusters, vector<Curve> Curves_dataset, vector<Curve> centroids, double* stotal);

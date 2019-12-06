@@ -299,3 +299,79 @@ vector<Curve> Curves_PAM_alaLloyds(vector<Curve> centroids, vector<Cluster> temp
 
     return new_centroids;
 }
+
+double average_curve_distance(Curve curve, int cluster_id, vector<Cluster> clusters, vector<Curve> Curves_dataset, vector<Curve> centroids){
+    double a = 0.0;
+    double b = 0.0;
+
+    //vriskw to meso oro twn apostasewn tou shmeiou apo ta upoloipa shmeia tou cluster sto opoio anhkei
+    for(int i=0; i<clusters.at(cluster_id).get_positions().size(); i++){
+        Curve tmp_curve = Curves_dataset.at(clusters.at(cluster_id).get_positions().at(i));
+        int m1 = curve.get_points().size();
+        int m2 = tmp_curve.get_points().size();
+        double **table = DTW(curve, tmp_curve);
+        a += table[m1-1][m2-1];
+        for(int t=0; t<m1+1; t++)
+            delete[] table[t];
+        delete[] table;
+    }
+    a = a/clusters.at(cluster_id).get_positions().size();
+
+    //vriskw to epomeno kontinotero kentro
+    long int min = 1000000;
+    int second_centroid = -1;
+    for(int i=0; i<centroids.size(); i++){
+        if(i == cluster_id) continue;
+        int m1 = curve.get_points().size();
+        int m2 =  centroids.at(i).get_points().size();
+        double **table = DTW(curve, centroids.at(i));
+
+        int dist = table[m1-1][m2-1];//distance_l1(item.get_vector(), centroids.at(i).get_vector(), d);
+        if(dist < min){
+            min = dist;
+            second_centroid = i;
+        }
+        for(int t=0; t<m1+1; t++)
+            delete[] table[t];
+        delete[] table;
+    }
+    //vriskw to meso oro twn apostasewn tou shmeiou apo ta upoloipa shmeia tou epomenou kontinoterou cluster
+    for(int i=0; i<clusters.at(second_centroid).get_positions().size(); i++){
+        Curve tmp_curve = Curves_dataset.at(clusters.at(second_centroid).get_positions().at(i));
+        int m1 = curve.get_points().size();
+        int m2 = tmp_curve.get_points().size();
+        double **table = DTW(curve, tmp_curve);
+        b += table[m1-1][m2-1];
+        for(int t=0; t<m1+1; t++)
+            delete[] table[t];
+        delete[] table;
+    }
+    b = b/clusters.at(second_centroid).get_positions().size();
+
+    double si = (b - a)/(max(a,b));
+
+    return si;
+}
+
+vector<double> Curve_Silhouette(vector<Cluster> clusters, vector<Curve> Curves_dataset, vector<Curve> centroids, double* stotal){
+    vector<double> s;
+
+    //gia ka8e cluster vriskw to average s(p) of points
+    for(int c=0; c<centroids.size(); c++){
+        double sp = 0.0;
+
+        for(int i=0; i<clusters.at(c).get_positions().size(); i++){
+            Curve curve = Curves_dataset.at(clusters.at(c).get_positions().at(i));
+            double si = average_curve_distance(curve, c, clusters, Curves_dataset, centroids);
+            sp += si;
+        }
+
+        sp = sp/clusters.at(c).get_positions().size();
+        *stotal += sp;
+        s.push_back(sp);
+    }
+
+    *stotal = *stotal/centroids.size();
+
+    return s;
+}

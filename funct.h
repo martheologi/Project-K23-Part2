@@ -10,4 +10,4 @@ Vector_Item HyperCubeNN(vector<Vector_Item> Items, Vector_Item, vector<Hypercube
 
 Vector_Item ExactNN(vector<Vector_Item>, Vector_Item, int, int*);
 
-void write_results(string outfile, int I, int A, int U, int k, vector<Cluster> clusters, double cltime);
+void write_results(string outfile, int I, int A, int U, int k, vector<Cluster> clusters, vector<Vector_Item> centroids, double cltime, int complete, vector<double> s, double stotal);

@@ -19,6 +19,12 @@ int main(int argc, char* argv[]){
     string INfile=argv[2];
     string Cfile=argv[4];
     string OUTfile=argv[6];
+    int complete;
+    if(argc == 9)
+        complete = stoi(argv[8]);
+    else
+        complete = 0;
+
     int numof_clusters, numof_grids, numofV_hashtables, numofV_hashfuncts;
 
     //anoigoume to cluster.conf kai pairnoume tis times twn metavlhtwn
@@ -92,12 +98,11 @@ int main(int argc, char* argv[]){
                         centroids = new_centroids;
                     }
                     double time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-                    write_results(OUTfile, i, a, u, numof_clusters, clusters, time);
-                    //
-                    // for(int i=0; i<numof_clusters; i++){
-                    //     clusters.at(i).print_cluster();
-                    //     cout << endl;
-                    // }
+
+                    double stotal = 0.0;
+                    vector<double> s = Silhouette(clusters, Items, centroids, &stotal);
+
+                    write_results(OUTfile, i, a, u, numof_clusters, clusters, centroids, time, complete, s, stotal);
 
                     centroids.clear();
                     clusters.clear();
@@ -175,11 +180,10 @@ int main(int argc, char* argv[]){
                     double time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 
                     if(clusters.size() != 0){
-                        write_results(OUTfile, i, a, u, numof_clusters, clusters, time);
-                        // for(int i=0; i<numof_clusters; i++){
-                        //   clusters.at(i).print_cluster();
-                        //   cout << endl;
-                        // }
+                        double stotal = 0.0;
+                        vector<double> s = Curve_Silhouette(clusters, Curves_dataset, centroids, &stotal);
+
+                        write_curve_results(OUTfile, i, a, u, numof_clusters, clusters, centroids, time, complete, s, stotal);
                     }
 
                     centroids.clear();

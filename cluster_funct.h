@@ -15,3 +15,9 @@ vector<Cluster> Empty_cluster_check(int numof_clusters, vector<Cluster> temp_clu
 vector<Vector_Item> Mean_Vector_Update(vector<Cluster> temp_clusters, vector<Vector_Item> Items);
 
 vector<Vector_Item> PAM_alaLloyds(vector<Vector_Item> centroids, vector<Cluster> temp_clusters, vector<Vector_Item> Items);
+
+double average_distance(Vector_Item item, int cluster_id, vector<Cluster> clusters, vector<Vector_Item> Items, vector<Vector_Item> centroids);
+
+vector<double> Silhouette(vector<Cluster> clusters, vector<Vector_Item> Items, vector<Vector_Item> centroids, double* stotal);
+
+vector<double> Silhouette(vector<Cluster> clusters, vector<Curve> Curves_dataset, vector<Curve> centroids, double* stotal);

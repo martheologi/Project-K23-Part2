@@ -166,7 +166,7 @@ Vector_Item AproximateNN(vector<Vector_Item> Items, Vector_Item item, vector<Buc
     return Items.at(NN_position);
 }
 
-void write_results(string outfile, int I, int A, int U, int k, vector<Cluster> clusters, double cltime){
+void write_results(string outfile, int I, int A, int U, int k, vector<Cluster> clusters, vector<Vector_Item> centroids, double cltime, int complete, vector<double> s, double stotal){
 
     ofstream Outfile;
     Outfile.open(outfile, ios::app);
@@ -176,11 +176,34 @@ void write_results(string outfile, int I, int A, int U, int k, vector<Cluster> c
     Outfile << "Algorithm: I" << I << "A" << A << "U" << U << endl;
 
     for(int i=0;i<k;i++){
-        Outfile << "CLUSTER-" << i+1 << " {size: " << clusters.at(i).get_positions().size() << ", centroid: " << clusters.at(i).get_center_id() << "}" << endl;
+        if(clusters.at(i).get_center_id() == "new_c"){
+            Outfile << "CLUSTER-" << i+1 << " {size: " << clusters.at(i).get_positions().size() << ", centroid: ( ";
+            for(int j=0; j<centroids.at(i).get_vector().size(); j++)
+                Outfile << centroids.at(i).get_vector().at(j) << " ";
+            Outfile << ") }" << endl;
+        }
+        else
+            Outfile << "CLUSTER-" << i+1 << " {size: " << clusters.at(i).get_positions().size() << ", centroid: " << clusters.at(i).get_center_id() << "}" << endl;
     }
 
     Outfile << "clustering_time: " << cltime << endl;
 
+    Outfile << "Silhouette: [ ";
+    for(int i=0; i<centroids.size(); i++){
+        Outfile << s.at(i) << ", ";
+    }
+    Outfile << "stotal = " << stotal << " ]" << endl;
+
+    if(complete){
+        for(int i=0; i<clusters.size(); i++){
+            Outfile << "Cluster-" << i+1 << " { ";
+            for(int j=0; j<clusters.at(i).get_positions().size(); j++)
+                Outfile << clusters.at(i).get_positions().at(j) << " ";
+            Outfile << " }" << endl;
+        }
+    }
+
+    Outfile << endl;
     Outfile.close();
 
     return;
