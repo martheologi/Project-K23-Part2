@@ -12,6 +12,8 @@ vector<Cluster> Curve_Assignment_By_Range_Search(vector<Curve> centroids, vector
 
 vector<Curve> Curves_PAM_alaLloyds(vector<Curve> centroids, vector<Cluster> temp_clusters, vector<Curve> Curves_dataset);
 
+vector<Curve> Curve_Mean_Vector_Update(vector<Cluster> temp_clusters, vector<Curve> Curves_dataset);
+
 double average_curve_distance(Curve curve, int cluster_id, vector<Cluster> clusters, vector<Curve> Curves_dataset, vector<Curve> centroids);
 
 vector<double> Curve_Silhouette(vector<Cluster> clusters, vector<Curve> Curves_dataset, vector<Curve> centroids, double* stotal);

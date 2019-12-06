@@ -63,8 +63,8 @@ int Initialize_Curve_Dataset(string filename, vector<Curve>* Curves_dataset, int
     file.open(filename);
 
     // extracting from the file
-    while (file.good())
-    //for(int i=0; i<100; i++)
+    //while (file.good())
+    for(int i=0; i<100; i++)
     {
         if (!getline (file, line)) break;
         c++;
@@ -302,7 +302,7 @@ void write_curve_results(string outfile, int I, int A, int U, int k, vector<Clus
         if(clusters.at(i).get_center_id() == "new_c"){
             Outfile << "CLUSTER-" << i+1 << " {size: " << clusters.at(i).get_positions().size() << ", centroid: ( ";
             for(int j=0; j<centroids.at(i).get_m(); j++)
-                Outfile << "(" << centroids.at(i).get_points().at(i).get_x() << " , " << centroids.at(i).get_points().at(i).get_y() << ") ";
+                Outfile << "(" << centroids.at(i).get_points().at(j).get_x() << " , " << centroids.at(i).get_points().at(j).get_y() << ") ";
             Outfile << ") }" << endl;
         }
         else

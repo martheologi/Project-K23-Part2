@@ -36,8 +36,9 @@ vector<Point> Curve::get_points(){
 
 int Curve::equal(Curve curve){
     if(m != curve.get_m()) return 0;
-    
-    for(int i=0; i<points.size(); i++){
+    //cout << m << " " <<curve.get_m() << endl;
+
+    for(int i=0; i<m; i++){
         if((points.at(i).get_x() != curve.get_points().at(i).get_x()) || (points.at(i).get_y() != curve.get_points().at(i).get_y())) return 0;
     }
     return 1;

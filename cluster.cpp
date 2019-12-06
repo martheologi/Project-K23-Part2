@@ -158,23 +158,23 @@ int main(int argc, char* argv[]){
                         //Assignment
                         if(a == 1)
                             temp_clusters = Curves_Lloyds_Assignment(numof_clusters, centroids, Curves_dataset);
-                        else if(a == 2){
-                            it++;
+                        else if(a == 2)
                             temp_clusters = Curve_Assignment_By_Range_Search(centroids, Curves_dataset, HT, numof_clusters, numof_grids, numofV_hashfuncts, buckets, W, m, M, max_coord, max_points);
-                        }
+
                         //Update
                         if(u == 1)
-                           new_centroids = Curves_PAM_alaLloyds(centroids, temp_clusters, Curves_dataset);
-                        else if(u == 2) break;
-                            //new_centroids = Curve_Mean_Vector_Update(temp_clusters, Curves_dataset);
+                            new_centroids = Curves_PAM_alaLloyds(centroids, temp_clusters, Curves_dataset);
+                        else if(u == 2)
+                            new_centroids = Curve_Mean_Vector_Update(temp_clusters, Curves_dataset);
 
                         if(Equal_Curve_centroids(centroids, new_centroids, numof_clusters)) flag = 1;
 
-                        if((flag == 1) || (it == 10)){
+                        if((flag == 1) || (it == 20)){
                             clusters = temp_clusters;
                             break;
                         }
                         centroids = new_centroids;
+                        it++;
                     }
 
                     double time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;

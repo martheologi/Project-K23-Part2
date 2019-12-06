@@ -132,8 +132,7 @@ vector<Cluster> Curves_Lloyds_Assignment(int numof_clusters, vector<Curve> centr
             int m2 = centroids.at(j).get_points().size();
             double **table = DTW(Curves_dataset.at(i),centroids.at(j));
             double dist = table[m1-1][m2-1];
-            //double dist = distance_l1(Items.at(i).get_vector(), centroids.at(j).get_vector(), d);
-            //cout << dist << "\t";
+
             if(dist < min_dist){
                 min_dist = dist;
                 nearest_centre_pos = j;
@@ -143,7 +142,6 @@ vector<Cluster> Curves_Lloyds_Assignment(int numof_clusters, vector<Curve> centr
             delete[] table;
         }
         clusters.at(nearest_centre_pos).push_position(i);
-        //cout<< endl << Items.at(i).get_item_id() << " to center " << centroids.at(nearest_centre_pos).get_item_id() << endl;
     }
     //checking if we have an empty cluster
     clusters = Empty_Curve_cluster_check(numof_clusters, clusters, centroids, Curves_dataset);
@@ -297,6 +295,39 @@ vector<Curve> Curves_PAM_alaLloyds(vector<Curve> centroids, vector<Cluster> temp
         }
     }
 
+    return new_centroids;
+}
+
+vector<Curve> Curve_Mean_Vector_Update(vector<Cluster> temp_clusters, vector<Curve> Curves_dataset){
+    vector<Curve> new_centroids;
+
+    //gia ka8e cluster
+    for(int i=0; i<temp_clusters.size(); i++){
+        int T = temp_clusters.at(i).get_positions().size(); //to plh8os twn dianusmatwn sto cluster
+        Curve new_c;
+        new_c.set_id("new_c");
+
+        //vriskw to meso oro twn mege8wn twn kampulwn
+        int len = 0;
+        for(int j=0; j<temp_clusters.at(i).get_positions().size(); j++){
+            Curve curve = Curves_dataset.at(temp_clusters.at(i).get_positions().at(j));
+            len += curve.get_m();
+        }
+        len = len/temp_clusters.at(i).get_positions().size();
+        new_c.set_m(len);
+
+        //ftiaxnw to neo kentro apo ta points enos tuxaiou shmeiou tou dataset se mege8os len
+        for(int j=0; j<temp_clusters.at(i).get_positions().size(); j++){
+            Curve curve = Curves_dataset.at(temp_clusters.at(i).get_positions().at(j));
+            if(curve.get_m() >= len){
+                for(int m=0; m<len; m++){
+                    new_c.push_point(curve.get_points().at(m));
+                }
+                break;
+            }
+        }
+        new_centroids.push_back(new_c);
+    }
     return new_centroids;
 }
 
